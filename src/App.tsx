@@ -1,4 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e) { return { error: e.message }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{ padding: 40, fontFamily: "monospace", background: "#fff", color: "#333" }}>
+        <h2>Something went wrong</h2>
+        <pre style={{ whiteSpace: "pre-wrap", fontSize: 12 }}>{this.state.error}</pre>
+      </div>
+    );
+    return this.props.children;
+  }
+}
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 
@@ -562,7 +576,7 @@ function SSTitle({ children, t }) {
 
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
-export default function AcqPro() {
+function AcqProInner() {
   const [dark, setDark]     = useState(false);
   const t = dark ? DARK : LIGHT;
   const [mobile, setMobile] = useState(false);
@@ -1039,5 +1053,13 @@ export default function AcqPro() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AcqPro() {
+  return (
+    <ErrorBoundary>
+      <AcqProInner />
+    </ErrorBoundary>
   );
 }
