@@ -565,11 +565,12 @@ function SSTitle({ children, t }) {
 export default function AcqPro() {
   const [dark, setDark]     = useState(false);
   const t = dark ? DARK : LIGHT;
-  const [mobile, setMobile] = useState(window.innerWidth < 768);
+  const [mobile, setMobile] = useState(false);
   useEffect(() => {
-    const handler = () => setMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
+    const check = () => setMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   const [step, setStep]     = useState(0);
