@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 
@@ -508,7 +508,7 @@ function PainGauge({ value, onChange, t }) {
 
 function Inp({ label, value, onChange, placeholder, span, dollar, t }) {
   return (
-    <label style={{ display:"flex",flexDirection:"column",gap:4,fontSize:10,fontWeight:700,color:t.textSub,textTransform:"uppercase",letterSpacing:.5,...(span===2?{gridColumn:"span 2"}:{}) }}>
+    <label style={{ display:"flex",flexDirection:"column",gap:4,fontSize:10,fontWeight:700,color:t.textSub,textTransform:"uppercase",letterSpacing:.5,...(span===2?{gridColumn:mobile?"span 1":"span 2"}:{}) }}>
       {label}
       <div style={{ position:"relative" }}>
         {dollar && <span style={{ position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",color:t.textMuted,fontSize:13,pointerEvents:"none" }}>$</span>}
@@ -565,6 +565,12 @@ function SSTitle({ children, t }) {
 export default function AcqPro() {
   const [dark, setDark]     = useState(false);
   const t = dark ? DARK : LIGHT;
+  const [mobile, setMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
   const [step, setStep]     = useState(0);
   const [mode, setMode]     = useState("script");
@@ -706,46 +712,46 @@ export default function AcqPro() {
     <div style={{ background:t.bg,minHeight:"100vh",fontFamily:"'DM Sans','Trebuchet MS',sans-serif",color:t.text,fontSize:14,transition:"background .25s,color .25s" }}>
 
       {/* HEADER */}
-      <div style={{ background:t.bgHeader,borderBottom:`1px solid ${t.borderHeader}`,padding:"10px 20px",display:"flex",alignItems:"center",gap:14,position:"sticky",top:0,zIndex:100,flexWrap:"wrap",boxShadow:dark?"0 2px 20px rgba(0,0,0,.4)":"0 2px 12px rgba(0,0,0,.08)" }}>
+      <div style={{ background:t.bgHeader,borderBottom:`1px solid ${t.borderHeader}`,padding:mobile?"8px 12px":"10px 20px",display:"flex",alignItems:"center",gap:mobile?8:14,position:"sticky",top:0,zIndex:100,flexWrap:"wrap",boxShadow:dark?"0 2px 20px rgba(0,0,0,.4)":"0 2px 12px rgba(0,0,0,.08)" }}>
         <div style={{ display:"flex",flexDirection:"column",gap:1 }}>
-          <div style={{ fontSize:18,fontWeight:800,color:t.accent,letterSpacing:-.5 }}>⚡ AcqPro</div>
-          <div style={{ fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:1 }}>Acquisition Intelligence</div>
+          <div style={{ fontSize:mobile?15:18,fontWeight:800,color:t.accent,letterSpacing:-.5 }}>⚡ AcqPro</div>
+          {!mobile && <div style={{ fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:1 }}>Acquisition Intelligence</div>}
         </div>
 
-        <div style={{ display:"flex",gap:4,flex:1,flexWrap:"wrap" }}>
+        {/* STEP NAV — scrollable on mobile */}
+        <div style={{ display:"flex",gap:4,flex:1,flexWrap:mobile?"nowrap":"wrap",overflowX:mobile?"auto":"visible",WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none",minWidth:0 }}>
           {STEPS.map((name,i) => (
-            <button key={i} onClick={() => setStep(i)} style={{ background:i===step?t.accent+"1e":i<step?t.accentGreen+"12":t.bgStepBtn,border:`1px solid ${i===step?t.accent+"66":i<step?t.accentGreen+"44":t.borderStep}`,color:i===step?t.accent:i<step?t.accentGreen:t.textStep,padding:"5px 11px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:5,fontSize:12,fontWeight:500 }}>
+            <button key={i} onClick={() => setStep(i)} style={{ background:i===step?t.accent+"1e":i<step?t.accentGreen+"12":t.bgStepBtn,border:`1px solid ${i===step?t.accent+"66":i<step?t.accentGreen+"44":t.borderStep}`,color:i===step?t.accent:i<step?t.accentGreen:t.textStep,padding:mobile?"5px 8px":"5px 11px",borderRadius:6,cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontSize:mobile?11:12,fontWeight:500,flexShrink:0,whiteSpace:"nowrap" }}>
               <span style={{ fontWeight:700,fontSize:10 }}>{i<step?"✓":i+1}</span>
-              <span>{name}</span>
+              {(!mobile || i===step) && <span>{name}</span>}
             </button>
           ))}
         </div>
 
-        <div style={{ display:"flex",gap:8,alignItems:"center" }}>
-          {pain>0 && <div style={{ border:`1px solid ${painCol}`,color:painCol,padding:"3px 11px",borderRadius:20,fontSize:11,fontWeight:700 }}>💢 Pain {pain}/10</div>}
-          {lead.name && <div style={{ background:t.accent+"14",border:`1px solid ${t.accent}33`,color:t.accent,padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:700 }}>📞 {lead.name}</div>}
-
-          {/* THEME TOGGLE */}
+        <div style={{ display:"flex",gap:6,alignItems:"center" }}>
+          {pain>0 && !mobile && <div style={{ border:`1px solid ${painCol}`,color:painCol,padding:"3px 11px",borderRadius:20,fontSize:11,fontWeight:700 }}>💢 {pain}/10</div>}
+          {lead.name && !mobile && <div style={{ background:t.accent+"14",border:`1px solid ${t.accent}33`,color:t.accent,padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:700 }}>📞 {lead.name}</div>}
           <button
             onClick={() => setDark(!dark)}
             title={dark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            style={{ display:"flex",alignItems:"center",gap:7,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.06)",border:`1px solid ${dark?"rgba(255,255,255,.14)":"rgba(0,0,0,.12)"}`,borderRadius:20,padding:"5px 14px",cursor:"pointer",color:t.textSub,fontSize:12,fontWeight:700,transition:"all .2s" }}>
+            style={{ display:"flex",alignItems:"center",gap:mobile?4:7,background:dark?"rgba(255,255,255,.07)":"rgba(0,0,0,.06)",border:`1px solid ${dark?"rgba(255,255,255,.14)":"rgba(0,0,0,.12)"}`,borderRadius:20,padding:mobile?"5px 10px":"5px 14px",cursor:"pointer",color:t.textSub,fontSize:12,fontWeight:700,transition:"all .2s",flexShrink:0 }}>
             <span style={{ fontSize:15,lineHeight:1 }}>{dark ? "☀️" : "🌙"}</span>
-            <span>{dark ? "Light" : "Dark"}</span>
+            {!mobile && <span>{dark ? "Light" : "Dark"}</span>}
           </button>
         </div>
       </div>
 
-      <div style={{ padding:"18px",maxWidth:1440,margin:"0 auto" }}>
-        <div style={{ display:"grid",gridTemplateColumns:"1fr 370px",gap:18,alignItems:"start" }}>
+      <div style={{ padding:mobile?"10px":"18px",maxWidth:1440,margin:"0 auto" }}>
+        {/* MOBILE: side panel shown as collapsible tabs below main; DESKTOP: two-column */}
+        <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 370px",gap:mobile?12:18,alignItems:"start" }}>
 
           {/* MAIN PANEL */}
-          <div style={{ background:t.bgMain,border:`1px solid ${t.borderCard}`,borderRadius:12,padding:26,boxShadow:dark?"none":"0 2px 16px rgba(0,0,0,.07)" }}>
+          <div style={{ background:t.bgMain,border:`1px solid ${t.borderCard}`,borderRadius:12,padding:mobile?14:26,boxShadow:dark?"none":"0 2px 16px rgba(0,0,0,.07)" }}>
 
             {/* STEP 0 */}
             {step===0 && (
               <div>
-                <h2 style={{ fontSize:20,fontWeight:700,margin:"0 0 5px",color:t.textCard }}>📞 Greeting & Lead Info</h2>
+                <h2 style={{ fontSize:mobile?17:20,fontWeight:700,margin:"0 0 5px",color:t.textCard }}>📞 Greeting & Lead Info</h2>
                 <p style={{ fontSize:12,color:t.textMuted,margin:"0 0 18px" }}>Set the frame. Establish credibility. Complete the Upfront Contract before going deeper.</p>
                 <div style={{ background:t.bgPregame,border:`1px solid ${t.accent}20`,borderRadius:9,padding:"12px 14px",marginBottom:18 }}>
                   <div style={{ fontSize:9,fontWeight:800,color:t.accent,textTransform:"uppercase",letterSpacing:1.2,marginBottom:8 }}>⚡ PREGAME</div>
@@ -755,7 +761,7 @@ export default function AcqPro() {
                     ))}
                   </div>
                 </div>
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr",gap:12 }}>
                   <Inp label="Seller Name" value={lead.name} onChange={v=>setLead({...lead,name:v})} placeholder="John Smith" t={t} />
                   <Inp label="Phone" value={lead.phone} onChange={v=>setLead({...lead,phone:v})} placeholder="(555) 000-0000" t={t} />
                   <Inp label="Property Address" value={lead.address} onChange={v=>setLead({...lead,address:v})} placeholder="123 Main St, City, State ZIP" span={2} t={t} />
@@ -764,7 +770,7 @@ export default function AcqPro() {
                 </div>
                 <div style={{ marginTop:20 }}>
                   <div style={{ fontSize:13,fontWeight:700,color:t.textCard,marginBottom:9 }}>📋 Upfront Contract Checklist</div>
-                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginTop:10 }}>
+                  <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr",gap:9,marginTop:10 }}>
                     {UFC_CHECKLIST.map(item => <Check key={item.id} checked={!!ufc[item.id]} onToggle={() => setUfc(p=>({...p,[item.id]:!p[item.id]}))} label={item.label} t={t} />)}
                   </div>
                 </div>
@@ -778,7 +784,7 @@ export default function AcqPro() {
               <div>
                 <h2 style={{ fontSize:20,fontWeight:700,margin:"0 0 5px",color:t.textCard }}>🔎 Fact Find & Property Details</h2>
                 <p style={{ fontSize:12,color:t.textMuted,margin:"0 0 18px" }}>Build rapport. Dig on the WHY. Minimum 7 minutes. Use Pain tab for rapport and pain openers.</p>
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr 1fr",gap:12 }}>
                   <Sel label="Beds"  value={prop.beds}  onChange={v=>setProp({...prop,beds:v})}  options={["1","2","3","4","5","6+"]} t={t} />
                   <Sel label="Baths" value={prop.baths} onChange={v=>setProp({...prop,baths:v})} options={["1","1.5","2","2.5","3","3.5","4+"]} t={t} />
                   <Inp label="Sq Footage"         value={prop.sqft} onChange={v=>setProp({...prop,sqft:v})} placeholder="1,800"    t={t} />
@@ -815,7 +821,7 @@ export default function AcqPro() {
               <div>
                 <h2 style={{ fontSize:20,fontWeight:700,margin:"0 0 5px",color:t.textCard }}>🔍 Seller Situation</h2>
                 <p style={{ fontSize:12,color:t.textMuted,margin:"0 0 18px" }}>Select all that apply. Switch to Pain tab for the full situation-specific pain funnel.</p>
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr 1fr":"repeat(3,1fr)",gap:7 }}>
                   {SITUATIONS.map(sit => (
                     <button key={sit.id} onClick={() => toggleSit(sit.id)} style={{ background:situations.includes(sit.id)?t.accent+"16":t.bgRepair,border:`1px solid ${situations.includes(sit.id)?t.accent+"66":t.borderRepair}`,borderRadius:8,padding:"10px 7px",cursor:"pointer",color:situations.includes(sit.id)?t.accent:t.textSub,fontSize:11,fontWeight:600,display:"flex",flexDirection:"column",alignItems:"center",gap:4,textAlign:"center" }}>
                       <span style={{ fontSize:19 }}>{sit.icon}</span>
@@ -846,7 +852,7 @@ export default function AcqPro() {
                     {CONDITIONS.map(c => <button key={c} onClick={() => setCondition(c)} style={{ background:condition===c?t.accent+"18":t.bgPill,border:`1px solid ${condition===c?t.accent+"66":t.borderPill}`,color:condition===c?t.accent:t.textSub,padding:"5px 12px",borderRadius:20,cursor:"pointer",fontSize:12,fontWeight:600 }}>{c}</button>)}
                   </div>
                 </div>
-                <div style={{ display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr 1fr":"repeat(4,1fr)",gap:6 }}>
                   {REPAIR_ITEMS.map(item => (
                     <div key={item.id} onClick={() => setRepairs(p=>({...p,[item.id]:!p[item.id]}))} style={{ background:repairs[item.id]?t.bgRepairOn:t.bgRepair,border:`1px solid ${repairs[item.id]?t.accentRed+"55":t.borderRepair}`,borderRadius:7,padding:"9px 8px",cursor:"pointer",userSelect:"none" }}>
                       <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4 }}>
@@ -880,7 +886,7 @@ export default function AcqPro() {
               <div>
                 <h2 style={{ fontSize:20,fontWeight:700,margin:"0 0 5px",color:t.textCard }}>💰 Offer & Financials</h2>
                 <p style={{ fontSize:12,color:t.textMuted,margin:"0 0 18px" }}>Use Budget questions (Pain tab) BEFORE revealing numbers. Never live negotiate.</p>
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr",gap:12 }}>
                   <Inp label="Mortgage Balance" value={mtg.balance} onChange={v=>setMtg({...mtg,balance:v})} placeholder="85,000" dollar t={t} />
                   <Inp label="Monthly Payment"  value={mtg.payment} onChange={v=>setMtg({...mtg,payment:v})} placeholder="850"    dollar t={t} />
                   <Inp label="Lender / Servicer" value={mtg.lender} onChange={v=>setMtg({...mtg,lender:v})} placeholder="Chase, Wells Fargo..." t={t} />
@@ -888,7 +894,7 @@ export default function AcqPro() {
                 </div>
                 <div style={{ marginTop:18 }}>
                   <div style={{ fontSize:13,fontWeight:700,color:t.textCard,marginBottom:9 }}>📊 Deal Calculator</div>
-                  <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginTop:9 }}>
+                  <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr 1fr":"repeat(3,1fr)",gap:8,marginTop:9 }}>
                     {calcCards.map((c,i) => (
                       <div key={i} style={{ background:c.hl?t.bgCalcHL:t.bgCalc,border:`1px solid ${c.hl?t.accent+"44":t.border}`,borderRadius:8,padding:12,textAlign:"center" }}>
                         <div style={{ fontSize:9,color:t.textMuted,textTransform:"uppercase",letterSpacing:.4,marginBottom:5 }}>{c.label}</div>
@@ -899,7 +905,7 @@ export default function AcqPro() {
                 </div>
                 <div style={{ marginTop:18 }}>
                   <div style={{ fontSize:13,fontWeight:700,color:t.textCard,marginBottom:9 }}>🔢 Offer Tracking</div>
-                  <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12 }}>
+                  <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr 1fr",gap:12 }}>
                     <Inp label="First Offer (odd #)"  value={offerNums.first}   onChange={v=>setOfferNums({...offerNums,first:v})}   placeholder="247,358" dollar t={t} />
                     <Inp label="Counter (if pushed)"  value={offerNums.counter} onChange={v=>setOfferNums({...offerNums,counter:v})} placeholder="260,000" dollar t={t} />
                     <Inp label="Final Agreed"          value={offerNums.final}   onChange={v=>setOfferNums({...offerNums,final:v})}   placeholder="271,500" dollar t={t} />
@@ -933,7 +939,7 @@ export default function AcqPro() {
                   <div style={{ fontSize:11,color:t.textMuted }}>{new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}</div>
                 </div>
 
-                <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12 }}>
+                <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr":"1fr 1fr",gap:12 }}>
                   {[
                     { title:"👤 Lead", rows:[["Name",lead.name],["Phone",lead.phone],["Source",lead.source],["Occupancy",notes.occ]] },
                     { title:"🏠 Property", rows:[["Address",lead.address],["Type",prop.type],["Beds/Baths",`${prop.beds||"—"} / ${prop.baths||"—"}`],["Sq Ft / Year",`${prop.sqft||"—"} / ${prop.year||"—"}`],["Condition",condition],["Asking",asking?fmt(parseFloat(asking.replace(/,/g,""))):"—"]] },
@@ -970,7 +976,7 @@ export default function AcqPro() {
                     {repLow>0 && <div style={{ display:"flex",justifyContent:"space-between",borderTop:`1px solid ${t.border}`,marginTop:7,paddingTop:7,fontSize:11 }}><strong>TOTAL RANGE</strong><strong style={{ color:t.accent }}>{fmt(repLow)} – {fmt(repHi)}</strong></div>}
                   </div>
 
-                  <div style={{ background:t.bgCard,border:`1px solid ${t.accent}33`,borderRadius:10,padding:15,gridColumn:"span 2" }}>
+                  <div style={{ background:t.bgCard,border:`1px solid ${t.accent}33`,borderRadius:10,padding:15,gridColumn:mobile?"span 1":"span 2" }}>
                     <div style={{ fontSize:10,fontWeight:800,color:t.accent,textTransform:"uppercase",letterSpacing:.6,marginBottom:10 }}>⚡ Offer Analysis</div>
                     <div style={{ display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8 }}>
                       {calcCards.map((c,i) => (
@@ -992,12 +998,12 @@ export default function AcqPro() {
                     )}
                   </div>
 
-                  <div style={{ background:t.bgCard,border:`1px solid ${t.borderCard}`,borderRadius:10,padding:15,gridColumn:"span 2" }}>
+                  <div style={{ background:t.bgCard,border:`1px solid ${t.borderCard}`,borderRadius:10,padding:15,gridColumn:mobile?"span 1":"span 2" }}>
                     <div style={{ fontSize:10,fontWeight:800,color:t.accent,textTransform:"uppercase",letterSpacing:.6,marginBottom:10 }}>📋 Acquisition Manager Notes</div>
                     <textarea value={notes.manager} onChange={e=>setNotes({...notes,manager:e.target.value})} placeholder="Recommendation, deal strength, motivation level, red flags, follow-up strategy, final offer guidance..." style={{ background:t.bgInput,border:`1px solid ${t.borderInput}`,borderRadius:7,padding:"8px 10px",color:t.text,fontSize:13,outline:"none",fontFamily:"inherit",width:"100%",boxSizing:"border-box",height:85,resize:"vertical",marginTop:0 }} />
                     <div style={{ background:t.bgWhy,border:`1px solid ${t.accentPurple}22`,borderRadius:8,padding:13,marginTop:12 }}>
                       <div style={{ fontSize:9,fontWeight:800,color:t.accentPurple,textTransform:"uppercase",letterSpacing:1,marginBottom:10 }}>💼 WHY WORK WITH US</div>
-                      <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:7 }}>
+                      <div style={{ display:"grid",gridTemplateColumns:mobile?"1fr 1fr":"1fr 1fr 1fr",gap:7 }}>
                         {[["⚡","Close in 7–14 days — no banks, no delays"],["🏚️","Buy AS-IS — zero repairs, zero cleanout"],["💸","Zero commissions, zero closing costs"],["🎯","Flexible close — built around their timeline"],["📋","Simple 2-page agreement — plain English"],["🤝","No financing contingencies — offer certainty"]].map(([ic,tx],i) => (
                           <div key={i} style={{ display:"flex",gap:6,fontSize:11,color:t.textSub,lineHeight:1.5 }}><span>{ic}</span><span>{tx}</span></div>
                         ))}
@@ -1015,14 +1021,14 @@ export default function AcqPro() {
           </div>
 
           {/* SIDE PANEL */}
-          <div style={{ background:t.bgSide,border:`1px solid ${t.borderSide}`,borderRadius:12,overflow:"hidden",position:"sticky",top:68,maxHeight:"calc(100vh - 84px)",boxShadow:dark?"none":"0 2px 16px rgba(0,0,0,.07)" }}>
+          <div style={{ background:t.bgSide,border:`1px solid ${t.borderSide}`,borderRadius:12,overflow:"hidden",position:mobile?"relative":"sticky",top:mobile?0:68,maxHeight:mobile?"none":"calc(100vh - 84px)",boxShadow:dark?"none":"0 2px 16px rgba(0,0,0,.07)" }}>
             <SandlerBar stepIdx={step} t={t} />
             <div style={{ display:"flex",borderBottom:`1px solid ${t.border}` }}>
               {[["script","📋 Script"],["pain","💢 Pain"],["coaching","🧠 Coaching"]].map(([id,label]) => (
                 <button key={id} onClick={() => setMode(id)} style={{ flex:1,background:mode===id?t.bgModeTab:"transparent",border:"none",borderBottom:`2px solid ${mode===id?t.accent:"transparent"}`,color:mode===id?t.accent:t.textMuted,padding:"8px 5px",cursor:"pointer",fontSize:11,fontWeight:700,transition:"all .15s" }}>{label}</button>
               ))}
             </div>
-            <div style={{ padding:"14px 16px 16px",overflowY:"auto",maxHeight:"calc(100vh - 220px)" }}>
+            <div style={{ padding:"14px 16px 16px",overflowY:"auto",maxHeight:mobile?"60vh":"calc(100vh - 220px)" }}>
               {mode==="script"   && <ScriptContent />}
               {mode==="pain"     && <PainContent />}
               {mode==="coaching" && <CoachContent />}
