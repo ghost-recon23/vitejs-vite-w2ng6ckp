@@ -522,7 +522,7 @@ function PainGauge({ value, onChange, t }) {
 
 function Inp({ label, value, onChange, placeholder, span, dollar, t }) {
   return (
-    <label style={{ display:"flex",flexDirection:"column",gap:4,fontSize:10,fontWeight:700,color:t.textSub,textTransform:"uppercase",letterSpacing:.5,...(span===2?{gridColumn:mobile?"span 1":"span 2"}:{}) }}>
+    <label style={{ display:"flex",flexDirection:"column",gap:4,fontSize:10,fontWeight:700,color:t.textSub,textTransform:"uppercase",letterSpacing:.5,...(span===2?{gridColumn:"span 2"}:{}) }}>
       {label}
       <div style={{ position:"relative" }}>
         {dollar && <span style={{ position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",color:t.textMuted,fontSize:13,pointerEvents:"none" }}>$</span>}
